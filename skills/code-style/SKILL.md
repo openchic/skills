@@ -1,6 +1,6 @@
 ---
 name: code-style
-description: Code style and organization conventions for writing, modifying, refactoring, and reviewing code, including frontend components, Web styles, and backend APIs. Use even when style conventions are not explicitly requested. Covers language-agnostic rules and TypeScript/React-specific guidance.
+description: Code style and organization conventions for writing, modifying, refactoring, and reviewing code, including frontend components, Web styles, and backend APIs. Use even when style conventions are not explicitly requested. Covers language-agnostic rules, JavaScript/TypeScript, and frontend framework conventions.
 ---
 
 ## Usage Principles
@@ -21,7 +21,6 @@ This skill defines a personal coding style. Read the project's formatting, lint,
 
 Read the references for all scenarios involved in the task. Do not load unrelated references.
 
-- For frontend development or Web styling, read [references/frontend.md](references/frontend.md).
+- For frontend components, hooks, composables, pages, or Web styling, read [references/frontend.md](references/frontend.md), including the section for the project's framework.
 - For backend development, read [references/backend.md](references/backend.md).
-- For TypeScript, read [references/typescript.md](references/typescript.md); it applies to both frontend and backend code.
-- For React components or hooks, read [references/react.md](references/react.md) together with the frontend conventions.
+- For JavaScript or TypeScript, read [references/javascript-typescript.md](references/javascript-typescript.md); it applies to both frontend applications and Node.js backends.
