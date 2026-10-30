@@ -1,0 +1,9 @@
+# Defaults for the local pilot.
+engine: codex
+model: gpt-6-luna
+effort: max
+timeout_seconds: 300
+suites:
+  - code-style/eval.yaml
+  - commit/eval.yaml
+  - vainjs/eval.yaml

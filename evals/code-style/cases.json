@@ -1,0 +1,76 @@
+[
+  {
+    "id": "react-page",
+    "title": "React 页面结构与状态职责",
+    "fixture": "react",
+    "prompt": "UserList 页面里的请求和筛选状态混在一起了。请按工程规范整理这两类逻辑，让页面主体易读，保持原有界面、交互和对外接口。",
+    "references": [
+      ["frontend.md"],
+      ["javascript-typescript.md", "typescript.md"]
+    ],
+    "manual": true
+  },
+  {
+    "id": "vue-page",
+    "title": "Vue3 composable 与响应性",
+    "fixture": "vue",
+    "prompt": "UserList 的请求和筛选状态需要按职责整理，页面模板仍应容易读懂。请按工程规范重构，保持原有界面、交互和对外接口。",
+    "references": [
+      ["frontend.md"],
+      ["javascript-typescript.md", "typescript.md"]
+    ],
+    "manual": true
+  },
+  {
+    "id": "frontend-utils",
+    "title": "前端共享与私有工具",
+    "fixture": "frontend-utils",
+    "prompt": "Orders 和 Refunds 页面有重复的金额格式化实现。请消除重复并整理工具函数的归属，保持页面的对外接口和显示结果。",
+    "references": [
+      ["frontend.md"],
+      ["javascript-typescript.md", "typescript.md"]
+    ]
+  },
+  {
+    "id": "node-utils",
+    "title": "Node.js 共享工具与统一入口",
+    "fixture": "node-utils",
+    "prompt": "user-profile 和 email-report 存在重复的邮箱标准化逻辑。请消除重复，按工程规范整理模块归属，保持现有导出和业务结果。",
+    "references": [["javascript-typescript.md", "typescript.md"]]
+  },
+  {
+    "id": "file-routing",
+    "title": "文件路由命名优先级",
+    "fixture": "file-routing",
+    "prompt": "这是 Next.js App Router 工程。dashboard 页面需要新增一行 Showing {count} records，count 来自已有 records 数组。请整理实现并保留原有标题与链接。",
+    "references": [
+      ["frontend.md"],
+      ["javascript-typescript.md", "typescript.md"]
+    ]
+  },
+  {
+    "id": "project-config",
+    "title": "项目配置优先",
+    "fixture": "project-config",
+    "prompt": "users 与 reports 的首字母大写函数重复了。请按照现有工程约定整理，并保持已有 CommonJS 导出及业务结果。",
+    "references": [["javascript-typescript.md", "typescript.md"]]
+  },
+  {
+    "id": "code-review",
+    "title": "代码 review 隐式触发",
+    "fixture": "code-review",
+    "prompt": "请 review src/request.ts，指出会影响正确性的主要问题。只审查，不修改文件。",
+    "references": [["javascript-typescript.md", "typescript.md"]],
+    "readonly": true,
+    "manual": true
+  },
+  {
+    "id": "skill-document",
+    "title": "文档审查不误触发代码规范",
+    "fixture": "skill-document",
+    "prompt": "请 review docs/proposed-skill.md 中这份 skill 的措辞与适用范围是否清楚。这是文档审查，不涉及编写或审查业务代码；只提供建议，不修改文件。",
+    "references": [],
+    "readonly": true,
+    "negative": true
+  }
+]

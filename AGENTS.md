@@ -7,6 +7,7 @@ Code standards skills for AI coding assistants. Skills are distributed via `.cla
 ```
 .claude-plugin/marketplace.json   # Plugin registry
 skills/<name>/SKILL.md            # Skill file (YAML frontmatter + Markdown body)
+evals/                            # Evaluation harness, cases, fixtures, tests
 ```
 
 ## Commit Convention

@@ -1,0 +1,21 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,5 @@
+ # Title utility
+ 
+ A small title helper.
++
++Titles are normalized to uppercase.
+diff --git a/src/title.js b/src/title.js
+--- a/src/title.js
++++ b/src/title.js
+@@ -1 +1 @@
+-export const title = value => value.trim()
++export const title = value => value.trim().toUpperCase()
+diff --git a/src/version.js b/src/version.js
+new file mode 100644
+--- /dev/null
++++ b/src/version.js
+@@ -0,0 +1 @@
++export const version = "1.0.0"

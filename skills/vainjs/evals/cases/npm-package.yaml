@@ -1,0 +1,27 @@
+id: npm-package
+title: Scaffold a working npm library
+input:
+  prompt: |
+    在当前目录初始化一个名为 greeting-kit 的 npm 库，使用工程规范约定的工具链。
+    提供 TypeScript 导出 greet(name: string): string，返回 Hello, {name}!。
+    请完成依赖安装并验证构建，同时让发布入口与生成的 JavaScript、类型声明匹配。
+    只在当前临时工程操作，不发布、不推送、不创建提交。
+context:
+  repo_fixture: evals/fixtures/npm-package
+constraints:
+  timeout_seconds: 600
+expect:
+  exit_code: 0
+collect_artifacts:
+  - 'src/**'
+  - 'dist/**'
+  - '.husky/**'
+  - '.vscode/**'
+  - '.github/**'
+  - '*.json'
+  - '*.yaml'
+  - '*.ts'
+  - '*.mjs'
+  - '.prettierrc'
+  - '.gitignore'
+  - 'README.md'

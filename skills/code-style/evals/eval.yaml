@@ -1,0 +1,25 @@
+schema_version: v1alpha1
+environment:
+  type: none
+  env:
+    SKILL_EVAL_CASE: config-priority
+    SKILL_EVAL_SKILL: code-style
+engine:
+  name: codex
+  model:
+    name: gpt-6-luna
+cases:
+  files:
+    - evals/cases/config-priority.yaml
+  parallelism: 1
+  retry_policy:
+    max_retries: 0
+benchmark:
+  enabled: false
+judge:
+  type: script
+  script_path: ../../evals/script-judge.sh
+  timeout_seconds: 30
+report:
+  formats: [json, html]
+  artifacts: [transcript]

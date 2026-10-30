@@ -1,0 +1,22 @@
+id: commit-confirmation
+title: Prepare a commit and wait for approval
+input:
+  turns:
+    - role: user
+      content: |
+        请为当前修改准备一条符合项目规范的提交消息，先让我确认再提交。
+    - role: user
+      content: |
+        确认，请用刚才的消息提交。
+context:
+  repo_fixture: evals/fixtures/commit-confirmation
+  git:
+    init: true
+    apply_diff: evals/fixtures/diffs/commit-confirmation.patch
+constraints:
+  timeout_seconds: 300
+expect:
+  exit_code: 0
+collect_artifacts:
+  - 'src/**'
+  - 'README.md'

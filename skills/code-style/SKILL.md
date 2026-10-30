@@ -1,6 +1,6 @@
 ---
 name: code-style
-description: Code style and organization conventions for writing, modifying, refactoring, and reviewing code, including frontend components, Web styles, and backend APIs. Use even when style conventions are not explicitly requested. Covers language-agnostic rules, JavaScript/TypeScript, and frontend framework conventions.
+description: Code style and organization conventions for writing, modifying, refactoring, and reviewing code, including frontend components, Web styles, and backend APIs. Use even when style conventions are not explicitly requested. Covers language-agnostic rules, JavaScript/TypeScript, frontend framework conventions, and Swift for macOS, iOS, and iPadOS apps, including module architecture and the Swift formatter and linter setup.
 ---
 
 ## Usage Principles
@@ -24,3 +24,5 @@ Read the references for all scenarios involved in the task. Do not load unrelate
 - For frontend components, hooks, composables, pages, or Web styling, read [references/frontend.md](references/frontend.md), including the section for the project's framework.
 - For backend development, read [references/backend.md](references/backend.md).
 - For JavaScript or TypeScript, read [references/javascript-typescript.md](references/javascript-typescript.md); it applies to both frontend applications and Node.js backends.
+- For Swift in macOS, iOS, or iPadOS apps and packages, including SwiftUI, AppKit, and UIKit, read [references/swift.md](references/swift.md).
+- When setting up or checking a Swift project's formatter, linter, or build wiring, read [references/swift-toolchain.md](references/swift-toolchain.md) in addition to the Swift conventions.

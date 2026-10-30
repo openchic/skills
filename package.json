@@ -11,7 +11,11 @@
     "url": "git+https://github.com/vainjs/skills.git"
   },
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "check:skills": "node evals/check-skills.mjs",
+    "eval:pilot": "node evals/pilot.mjs",
+    "eval:skills": "node evals/eval-skills.mjs",
+    "test": "node --test evals/*.test.mjs"
   },
   "commitlint": {
     "extends": [
@@ -21,6 +25,15 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "husky": "^9.1.7"
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "husky": "^9.1.7",
+    "jsdom": "30.1.2",
+    "prettier": "3.9.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "5.9.3",
+    "vue": "3.5.43",
+    "yaml": "2.9.1"
   }
 }

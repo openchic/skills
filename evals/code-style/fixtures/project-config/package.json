@@ -1,0 +1,5 @@
+{
+  "name": "existing-commonjs-project",
+  "private": true,
+  "type": "commonjs"
+}

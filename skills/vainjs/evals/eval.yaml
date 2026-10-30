@@ -1,0 +1,25 @@
+schema_version: v1alpha1
+environment:
+  type: none
+  env:
+    SKILL_EVAL_CASE: npm-package
+    SKILL_EVAL_SKILL: vainjs
+engine:
+  name: codex
+  model:
+    name: gpt-6-luna
+cases:
+  files:
+    - evals/cases/npm-package.yaml
+  parallelism: 1
+  retry_policy:
+    max_retries: 0
+benchmark:
+  enabled: false
+judge:
+  type: script
+  script_path: ../../evals/script-judge.sh
+  timeout_seconds: 60
+report:
+  formats: [json, html]
+  artifacts: [transcript]
