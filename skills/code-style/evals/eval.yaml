@@ -1,9 +1,6 @@
 schema_version: v1alpha1
 environment:
   type: none
-  env:
-    SKILL_EVAL_CASE: config-priority
-    SKILL_EVAL_SKILL: code-style
 engine:
   name: codex
   model:
@@ -11,15 +8,14 @@ engine:
 cases:
   files:
     - evals/cases/config-priority.yaml
-  parallelism: 1
-  retry_policy:
-    max_retries: 0
+    - evals/cases/shared-contract.yaml
+    - evals/cases/local-change.yaml
+    - evals/cases/react-page-module.yaml
+  parallelism: 3
+  defaults:
+    timeout_seconds: 600
 benchmark:
   enabled: false
-judge:
-  type: script
-  script_path: ../../evals/script-judge.sh
-  timeout_seconds: 30
 report:
-  formats: [json, html]
+  formats: [html]
   artifacts: [transcript]

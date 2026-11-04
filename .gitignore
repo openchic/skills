@@ -25,3 +25,4 @@ node_modules
 *.local.json
 .omc
 eval-results/
+skills/*-workspace/

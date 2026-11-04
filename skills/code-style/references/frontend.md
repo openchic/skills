@@ -4,9 +4,10 @@ These conventions apply across frontend frameworks. React and Vue 3 have separat
 
 ## Module Organization
 
-- Use PascalCase for component names and directories, including page components, shared components, and module-private components. Each standalone component's directory name must match its component name.
+- Use PascalCase for component names and directories, including page components, shared components, and module-private components. Each component defined in its own file must live in a directory named after it.
 - Use `index` as the base name for module and component public entry files. Choose the extension according to the project's language, framework, and file responsibilities, such as `index.ts`, `index.tsx`, `index.js`, `index.jsx`, or `index.vue`.
 - For file-based routing, follow the framework's required route directory names and page entry filenames. These requirements take precedence over this document's PascalCase directory naming and `index` entry naming.
+- Keep page modules at the same level under `pages/`; define sub-pages as sibling page modules rather than nesting them inside the parent page module. File-based routing requirements take precedence over this rule.
 - Place shared components in the shared `components/` directory and page-private components in the page module's own `components/` directory. Keep page-private code inside the page module; do not create detached sibling directories for it.
 - Keep component styles in the same directory as the component.
 
@@ -30,15 +31,15 @@ src/
 └── pages/
     └── UserList/
         ├── index.tsx         # Page component entry
+        ├── index.module.less # Page styles
         ├── api.ts            # Page requests
         ├── components/
         │   └── UserFilter/
-        │       └── index.tsx
+        │       ├── index.tsx
+        │       └── index.module.less
         └── hooks/
             └── useUserList.ts
 ```
-
-Match style extensions to the project's preprocessor, and use the corresponding framework's `hooks/` or `composables/` directory for reusable logic.
 
 ## Request Wrappers
 
@@ -47,7 +48,7 @@ Match style extensions to the project's preprocessor, and use the corresponding 
 
 ## Application Module Files
 
-These file responsibilities apply to page and business modules. In `index.<ext>`, `<ext>` follows the entry-file convention above. The other examples use TypeScript filenames; use the corresponding project extensions for other languages.
+These file responsibilities apply to page modules and to business modules, meaning feature modules that are neither pages nor shared components. In `index.<ext>`, `<ext>` follows the entry-file convention above. The other examples use TypeScript filenames; use the corresponding project extensions for other languages.
 
 | File | Responsibility |
 | --- | --- |
@@ -60,28 +61,31 @@ These file responsibilities apply to page and business modules. In `index.<ext>`
 
 ## Components
 
-- Keep the page component's JSX or template structure intact. Avoid breaking it into overly granular child components; extract a child component only when it is sufficiently complex to justify being separated. Prefer hooks or composables to separate logic by responsibility. Keep the page component as the entry point so the page structure and the relationships among its child components and hooks or composables remain clear.
+- Keep the JSX or template structure of page and shared components intact. Avoid breaking it into overly granular child components; extract a child component only when it is sufficiently complex to justify being separated. Prefer hooks or composables to separate logic by responsibility. Keep the component file as the composition root so its structure and the relationships among its child components and hooks or composables remain clear.
+- Prefer one component per file; a simple, stateless subcomponent may stay in its parent component's file.
 - When declaring component exports in JavaScript or TypeScript, use default exports for page and business-module entry components. Expose shared components as named exports through their public `index` entry, following the JS/TS module conventions. Preserve export interfaces used by existing consumers.
 - Keep component-specific pure functions and constants close to their consumers. Extract reusable code into files with the corresponding responsibilities.
 - Expose imperative component interfaces through the framework's ref or component-exposure mechanism, following the project's convention.
-- In TypeScript, name props and ref-handle types `XProps` and `XRef`.
+- In TypeScript, name prop types `XProps`.
 
 ## JSX
 
 These rules apply when using JSX or TSX with any frontend framework.
 
 - Use double quotes for JSX string attributes. For multiline, non-self-closing tags, place `>` on the last attribute's line. Let the formatter handle `/>` for self-closing tags.
-- For single-branch conditional rendering, use an explicit boolean condition with `&&`.
+- For single-branch conditional rendering, use an explicit boolean condition with `&&`, for example `count > 0 && <List />`.
 
 ## Hooks and Composables
 
 - Hooks and composables encapsulate state and side effects; components handle composition and rendering.
 - Prefix hook and composable names with `use`, match each filename to its function name, and keep one hook or composable per file.
+- Place shared hooks and composables in the shared `hooks/` or `composables/` directory and module-private ones in their owning module's `hooks/` or `composables/` directory.
 - In TypeScript, name hook and composable configuration types `UseXxxOptions`; local private configuration types may use `Options`.
+- Declare hooks and composables with function declarations exported by name, e.g. `export function useXxx(options: UseXxxOptions) {}`.
 - Prefer existing project hooks, composables, and utilities. If no suitable implementation exists, use the framework's built-in primitives for the current need; do not introduce dependencies merely to satisfy style requirements.
 - Use an options object for multiple configuration fields; positional parameters are acceptable for a small, fixed set of inputs. Return an object, or a readonly tuple for paired values and operations. Preserve the framework's reactivity when exposing state.
 - Track inputs that drive recomputation or requests with the framework's dependency or reactive tracking mechanisms. Keep changes to those inputs observable.
-- When mount-time or deep-comparison logic is needed, prefer existing project implementations.
+- When lifecycle or deep-comparison logic is needed, prefer the project's existing hooks or utilities.
 - Prefer the project's existing no-op function for default callbacks. Use a no-op error handler only when ignoring errors is explicitly allowed.
 
 ## Import Order
@@ -100,20 +104,19 @@ Prefer HTML elements that match the content's semantics. Use `div` for layout-on
 - Prefer existing design tokens for colors, spacing, and font sizes, with type-compatible fallback values such as `var(--color-text, #333)` or `var(--spacing, 16px)`.
 - Keep third-party style overrides scoped to the current component, using the mechanism supported by the project's framework and styling tools. Avoid unscoped global overrides.
 - Inline styles are acceptable for one-off dynamic dimensions. Extract repeated styles into style files or shared constants.
-- Keep conditional class-name expressions consistent within a module.
 
 ### External CSS Modules
 
-Apply these rules when importing CSS Modules from separate stylesheet files.
+Apply these rules only when the project uses CSS Modules imported from separate stylesheet files. CSS Modules and preprocessors such as Less are not required; otherwise follow the project's existing styling solution.
 
-- Import them as `styles` and use `index.module.less` as the filename. Change only the extension when using another preprocessor or plain CSS.
+- Import them as `styles` and name the file according to the project's existing convention, such as `index.module.less`. Change only the extension when using another preprocessor or plain CSS.
 - When overriding third-party component classes in a CSS Module, place `:global(...)` under a local selector in that module.
 
 ## React-Specific Conventions
 
-- Use `index.tsx` or `index.jsx` for component entries, matching the project's language.
-- Place shared hooks in the shared `hooks/` directory and module-private hooks in their owning module's `hooks/` directory.
 - Declare components as arrow functions assigned to named variables.
+- Type component variables as `FC<XProps>`.
+- Name ref-handle types `XRef`.
 - Receive props as an object, then destructure props and set defaults in the function body.
 - Set `displayName` on every component, matching its component name.
 - Place pure functions and constants related to the current component above its definition.
@@ -124,8 +127,7 @@ Apply these rules when importing CSS Modules from separate stylesheet files.
 
 ## Vue 3-Specific Conventions
 
-- Use `index.vue` for component entries built as single-file components. For Composition API components, follow the project's `<script setup>` or `setup()` convention. In TypeScript projects, use `lang="ts"` on the script block.
-- Place shared composables in the shared `composables/` directory and module-private composables in their owning module's `composables/` directory.
+- For Composition API components, follow the project's `<script setup>` or `setup()` convention. In TypeScript projects, use `lang="ts"` on the script block.
 - In `<script setup>`, declare props and emitted events with `defineProps` and `defineEmits`. Set prop defaults using syntax supported by the project's Vue version.
 - For inputs that must drive reactive computations or requests, pass refs or getters into composables and track them with `watch` or `watchEffect`.
 - When consumers destructure composable state, return a plain object containing refs so the state remains reactive.

@@ -1,0 +1,30 @@
+title: Extend an existing API contract without changing the response convention
+input:
+  prompt: |
+    为 users 模块增加 loadUserOptions(client)，返回用户的 id 和 name 列表，过滤已停用的用户。
+    数据由 client.get('/users') 提供。对外导出该函数，保留已有接口。
+context:
+  repo_fixture: evals/fixtures/shared-contract
+  git:
+    init: true
+expect:
+  exit_code: 0
+  files_exist:
+    - src/users.ts
+    - src/types.ts
+    - src/client.ts
+judges:
+  - id: behavior
+    type: script
+    script_path: evals/checks/shared-contract.cjs
+  - id: structure
+    type: agent_judge
+    model: gpt-6-luna
+    pass_threshold: 1
+    criteria:
+      - loadUserOptions 的选项类型由现有 User 派生或直接使用 User 的字段类型，没有重新独立声明 id 和 name 的原始字段类型；引用实际定义和导入位置，仅有相同字段名不算复用。
+      - 延续 client.get 已经返回 data 的接口约定，调用者没有再次读取 response.data，没有改写 Client 或 User 的既有契约。引用调用链中的具体代码。
+      - 被测 Agent 只新增任务所需代码，没有安装依赖、改写工程配置或增加无用途的抽象。评审 Agent 只读核对产物。
+collect_artifacts:
+  - 'src/**'
+  - 'package.json'

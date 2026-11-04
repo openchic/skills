@@ -1,0 +1,32 @@
+title: Keep a local change local when sharing and i18n are unnecessary
+input:
+  prompt: |
+    formatReceipt 的金额显示需要调整为两位小数，例如 formatReceipt(3) 返回 Total: $3.00。
+    直接修改当前工程。
+context:
+  git:
+    init: true
+  files:
+    package.json: |
+      {"name":"receipt-fixture","private":true,"type":"commonjs"}
+    src/receipt.js: |
+      /** Format a receipt total. */
+      exports.formatReceipt = amount => `Total: $${amount}`
+expect:
+  exit_code: 0
+  files_exist: [src/receipt.js]
+judges:
+  - id: behavior
+    type: script
+    script_path: evals/checks/local-change.cjs
+  - id: structure
+    type: agent_judge
+    model: gpt-6-luna
+    pass_threshold: 1
+    criteria:
+      - formatReceipt 的 CommonJS 导出保持可用；金额格式化仍位于唯一使用它的模块，没有新建共享 utils、服务层或空目录文件。引用文件清单和实际代码。
+      - 工程没有国际化设施，未为单条 Total 文案新增语言包、copy 文件或国际化依赖；package.json 保持原样。评审 Agent 只读核对产物。
+collect_artifacts:
+  - 'src/**'
+  - '*.json'
+  - '*.cjs'

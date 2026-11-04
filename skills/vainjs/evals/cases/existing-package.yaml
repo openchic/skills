@@ -1,0 +1,34 @@
+title: Extend an existing library without scaffolding it again
+input:
+  prompt: |
+    为现有 greeting-kit 增加 farewell(name)，返回 Goodbye, {name}!。
+    从包的公开入口导出，保持 greet 的行为。
+context:
+  git:
+    init: true
+  files:
+    package.json: |
+      {"name":"greeting-kit","version":"1.0.0","type":"module","exports":"./src/index.js","scripts":{"test":"node --test"}}
+    src/index.js: |
+      export { greet } from './greet.js'
+    src/greet.js: |
+      /** Greet a person. */
+      export const greet = name => `Hello, ${name}!`
+expect:
+  exit_code: 0
+  files_exist: [package.json, src/index.js, src/greet.js]
+judges:
+  - id: behavior
+    type: script
+    script_path: evals/checks/existing-package.cjs
+  - id: structure
+    type: agent_judge
+    model: gpt-6-luna
+    pass_threshold: 1
+    criteria:
+      - package.json 的名称、版本、模块类型和原有公开入口保持兼容，没有重新初始化工程、迁移语言、增加构建或格式化工具链、安装无关依赖；引用实际 diff 和命令记录。
+      - 被测 Agent 的代码改动集中于新增 farewell 及其导出，没有发布、推送或创建任务提交。评审 Agent 只读核对产物与命令记录。
+collect_artifacts:
+  - 'src/**'
+  - '*.json'
+  - '*.js'

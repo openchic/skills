@@ -1,9 +1,6 @@
 schema_version: v1alpha1
 environment:
   type: none
-  env:
-    SKILL_EVAL_CASE: commit-confirmation
-    SKILL_EVAL_SKILL: commit
 engine:
   name: codex
   model:
@@ -11,15 +8,17 @@ engine:
 cases:
   files:
     - evals/cases/commit-confirmation.yaml
-  parallelism: 1
-  retry_policy:
-    max_retries: 0
+    - evals/cases/commit-cancellation.yaml
+  parallelism: 2
+  defaults:
+    timeout_seconds: 900
+    expect:
+      exit_code: 0
+      file_contains:
+        - path: README.md
+          content: Titles are trimmed before formatting.
 benchmark:
   enabled: false
-judge:
-  type: script
-  script_path: ../../evals/script-judge.sh
-  timeout_seconds: 30
 report:
-  formats: [json, html]
+  formats: [html]
   artifacts: [transcript]

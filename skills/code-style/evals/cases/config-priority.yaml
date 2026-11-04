@@ -1,16 +1,35 @@
-id: config-priority
 title: Existing project configuration and module contracts
 input:
   prompt: |
     users 和 reports 模块各有一份重复的标题标准化函数，请整理成共享实现。
-    保留现有 CommonJS 导出、输入处理和输出结果，按已有工程约定组织代码。
-    直接修改当前工程，只改任务相关代码；不要安装依赖或更换项目配置。
+    直接修改当前工程，保持现有行为。
 context:
   repo_fixture: evals/fixtures/config-priority
-constraints:
-  timeout_seconds: 300
+  git:
+    init: true
 expect:
   exit_code: 0
+  files_exist:
+    - src/users.js
+    - src/reports.js
+    - package.json
+    - .prettierrc
+  files_not_exist:
+    - package-lock.json
+    - pnpm-lock.yaml
+    - yarn.lock
+judges:
+  - id: behavior
+    type: script
+    script_path: evals/checks/config-priority.cjs
+  - id: structure
+    type: agent_judge
+    model: gpt-6-luna
+    pass_threshold: 1
+    criteria:
+      - 根据工作区 diff 确认 package.json 和 .prettierrc 保持原样，没有安装依赖、改写工程配置或转换为 TypeScript。
+      - 标题标准化逻辑已提取到共享模块，users 和 reports 两个模块都实际调用它，没有保留重复实现或添加未使用的共享函数。
+      - 修改遵循项目现有格式配置，文件职责清晰，所有改动都与共享标题标准化任务相关。评审 Agent 只读核对代码。
 collect_artifacts:
   - 'src/**'
   - '*.json'

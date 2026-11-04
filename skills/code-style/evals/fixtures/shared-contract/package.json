@@ -1,0 +1,5 @@
+{
+  "name": "shared-contract-fixture",
+  "private": true,
+  "type": "module"
+}
