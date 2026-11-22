@@ -2,13 +2,13 @@
   "name": "vainjs-skills",
   "private": "true",
   "description": "A collection of code standards skills for AI coding assistants.",
-  "homepage": "https://github.com/vainjs/skills#readme",
+  "homepage": "https://github.com/openchic/skills#readme",
   "bugs": {
-    "url": "https://github.com/vainjs/skills/issues"
+    "url": "https://github.com/openchic/skills/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vainjs/skills.git"
+    "url": "git+https://github.com/openchic/skills.git"
   },
   "scripts": {
     "prepare": "husky",

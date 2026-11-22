@@ -32,26 +32,24 @@ test('metadata accepts block descriptions and rejects duplicate YAML keys', () =
   )
 })
 
-test('static checks catch missing registry paths, broken links and unclosed fences', t => {
+test('static checks catch missing README listings, broken links and unclosed fences', t => {
   const root = temporaryDirectory(t)
-  for (const directory of ['skills', '.claude-plugin'])
-    fs.cpSync(path.join(ROOT, directory), path.join(root, directory), {
-      recursive: true,
-    })
-  fs.copyFileSync(path.join(ROOT, 'README.md'), path.join(root, 'README.md'))
-  const registryPath = path.join(root, '.claude-plugin/marketplace.json')
-  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'))
-  registry.plugins[0].skills.push('./skills/missing')
-  fs.writeFileSync(registryPath, JSON.stringify(registry))
+  fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), {
+    recursive: true,
+  })
+  fs.writeFileSync(
+    path.join(root, 'README.md'),
+    '# Available Skills\n\n- [code-style](skills/code-style/SKILL.md)\n- [vainjs](skills/vainjs/SKILL.md)\n'
+  )
   fs.appendFileSync(
     path.join(root, 'skills/code-style/SKILL.md'),
     '\n[bad](references/missing.md)\n\n```ts\n'
   )
   const errors = checkSkills(root).errors
   for (const message of [
-    'missing skill',
-    'broken local link',
-    'unclosed code fence',
+    'skills/commit/SKILL.md: not listed in README',
+    'skills/code-style/SKILL.md: broken local link: references/missing.md',
+    'skills/code-style/SKILL.md: unclosed code fence',
   ])
     assert.ok(
       errors.some(error => error.includes(message)),

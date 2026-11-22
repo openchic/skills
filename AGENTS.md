@@ -1,11 +1,10 @@
 # AGENTS.md
 
-Code standards skills for AI coding assistants. Skills are distributed via `.claude-plugin/marketplace.json`.
+Code standards skills for AI coding assistants. Install them with `pnpx skills add openchic/skills`.
 
 ## Structure
 
 ```
-.claude-plugin/marketplace.json   # Plugin registry
 skills/<name>/SKILL.md            # Skill file (YAML frontmatter + Markdown body)
 skills/<name>/evals/              # Skill-Up config, cases, fixtures, and behavior checks
 evals/                            # Static checks, previous-run comparison, and tests
@@ -27,5 +26,4 @@ Report improvements, regressions, no observed change, and inconclusive findings 
 ## Adding a New Skill
 
 1. Create `skills/<name>/SKILL.md` with `name` and `description` in frontmatter
-2. Update `.claude-plugin/marketplace.json` — add skill path to `skills` array
-3. Update `README.md` — add skill to Available Skills table
+2. Add the skill to the Available Skills table in `README.md`

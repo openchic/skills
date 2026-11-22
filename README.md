@@ -5,15 +5,7 @@ A collection of [Agent Skills](https://agentskills.io/what-are-skills) based on 
 ## Quick Start
 
 ```bash
-pnpx skills add vainjs/skills
-```
-
-Or add marketplace to Claude Code:
-
-```bash
-/plugin marketplace add vainjs/skills
-
-/plugin install code-skills@vainjs-skills
+pnpx skills add openchic/skills
 ```
 
 ## Available Skills
@@ -28,7 +20,7 @@ Or add marketplace to Claude Code:
 
 1. Fork the repository
 2. Add your skill under `skills/`
-3. Update `.claude-plugin/marketplace.json`
+3. Add the skill to the Available Skills table
 4. Submit a pull request
 
 ## Quality Checks

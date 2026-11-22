@@ -41,11 +41,10 @@ export const listFiles = directory => {
     .sort()
 }
 
-/** Validate distributable skills, local documentation links, and registry/README coverage. */
+/** Validate skill metadata, local documentation links, and README coverage. */
 export const checkSkills = (root = REPO_ROOT) => {
   const errors = []
   const names = new Set()
-  const registered = new Set()
   const report = (file, message) =>
     errors.push(`${path.relative(root, file)}: ${message}`)
   const insideRoot = target =>
@@ -144,43 +143,6 @@ export const checkSkills = (root = REPO_ROOT) => {
     }
   }
 
-  const registryFile = path.join(root, '.claude-plugin/marketplace.json')
-  try {
-    const registry = JSON.parse(fs.readFileSync(registryFile, 'utf8'))
-    if (!Array.isArray(registry.plugins) || !registry.plugins.length)
-      throw new Error('plugins must be a nonempty array')
-    const plugins = new Set()
-    for (const plugin of registry.plugins) {
-      if (!plugin.name || plugins.has(plugin.name))
-        report(registryFile, `missing or duplicate plugin name: ${plugin.name}`)
-      plugins.add(plugin.name)
-      if (typeof plugin.source !== 'string' || !plugin.source.startsWith('.')) {
-        report(registryFile, `unsupported local source for ${plugin.name}`)
-        continue
-      }
-      if (!Array.isArray(plugin.skills) || !plugin.skills.length) {
-        report(registryFile, `${plugin.name} must register at least one skill`)
-        continue
-      }
-      const pluginSkills = new Set()
-      for (const skill of plugin.skills) {
-        if (typeof skill !== 'string') {
-          report(registryFile, 'skill paths must be strings')
-          continue
-        }
-        const target = path.resolve(root, plugin.source, skill, 'SKILL.md')
-        if (!insideRoot(target) || !entries.includes(target))
-          report(registryFile, `missing skill: ${skill}`)
-        if (pluginSkills.has(target))
-          report(registryFile, `duplicate skill in ${plugin.name}: ${skill}`)
-        pluginSkills.add(target)
-        registered.add(target)
-      }
-    }
-  } catch (error) {
-    report(registryFile, error.message)
-  }
-
   const readmeSource = fs.existsSync(readme)
     ? fs.readFileSync(readme, 'utf8')
     : ''
@@ -190,7 +152,6 @@ export const checkSkills = (root = REPO_ROOT) => {
     )
   )
   for (const file of entries) {
-    if (!registered.has(file)) report(file, 'not registered in marketplace')
     if (!documented.has(file)) report(file, 'not listed in README')
   }
   return { skills: entries.length, errors }
