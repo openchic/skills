@@ -9,6 +9,7 @@ cases:
   files:
     - evals/cases/commit-confirmation.yaml
     - evals/cases/commit-cancellation.yaml
+    - evals/cases/commit-split.yaml
   parallelism: 2
   defaults:
     timeout_seconds: 900

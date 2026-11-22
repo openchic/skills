@@ -3,13 +3,13 @@ input:
   turns:
     - role: user
       content: |
-        在 README.md 末尾追加一行 Titles are trimmed before formatting.，完成这项文档修改即可。
+        Add the line "Titles are trimmed before formatting." at the end of README.md. That is the only change I need.
     - role: user
       content: |
-        请为当前修改准备一条符合项目规范的提交消息，先让我确认再提交。
+        Please draft a commit message for the current change using the project's conventions and wait for my approval before committing.
     - role: user
       content: |
-        确认，请用刚才的消息提交。
+        Approved. Please commit using the message you just proposed.
 context:
   repo_fixture: evals/fixtures/commit-confirmation
   git:
@@ -22,7 +22,15 @@ judge:
     profile: minimal
     transcript: file_ref
   criteria:
-    - 以用户消息划分 transcript 中的准备和确认阶段。确认前没有任务提交，准备阶段唯一的 Git 操作是 git add -A，回复末行单独给出准确描述 README 改动的 Conventional Commits 消息。
-    - 确认阶段只执行一次直接 git commit，消息与提案一致，无额外作者或署名参数、推送或文件修改。评审 Agent 可用一次只读 Git 查询核对最新两条历史及状态，确认仅新增一个包含 README 改动的提交且工作区干净。
+    - >-
+      Use the user messages to distinguish the planning and approval phases in the transcript. Before
+      approval, the working tree and index are preserved and no commit or push occurs. The plan lists
+      a Conventional Commits message that accurately describes the change, README.md, and a short summary.
+      The agent waits for approval.
+    - >-
+      After approval, the agent commits only the README change with the proposed message. The agent uses
+      no author overrides or attribution options and makes no pushes or file edits. The judge may run one
+      read-only Git query to inspect the two most recent commits and the status. Verify that exactly one
+      commit was added, it contains the README change, and the working tree is clean.
 collect_artifacts:
   - 'README.md'

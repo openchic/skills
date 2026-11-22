@@ -1,0 +1,40 @@
+title: Plan all pending changes and commit by purpose after approval
+input:
+  turns:
+    - role: user
+      content: |
+        Create a .gitignore with the *.log rule and stage that file. Add the line "Titles are trimmed before formatting."
+        at the end of README.md. Add docs/formatting.md to explain that leading and trailing whitespace is removed
+        before titles are formatted, and include an example. Leave the documentation changes unstaged.
+    - role: user
+      content: Please commit the changes using this repository's commit skill at .codex/skills/commit/SKILL.md.
+    - role: user
+      content: Approved. Please commit according to the plan you just listed.
+context:
+  repo_fixture: evals/fixtures/commit-confirmation
+  git:
+    init: true
+judge:
+  type: agent_judge
+  model: gpt-6-luna
+  pass_threshold: 1
+  context:
+    profile: minimal
+    transcript: file_ref
+  criteria:
+    - >-
+      Verify the state at the end of the first turn. Only .gitignore is staged, README.md is modified
+      but unstaged, and docs/formatting.md is untracked.
+    - >-
+      In the second turn, the agent uses this repository's commit skill, preserves the working tree and
+      index, and makes no commit or push. The plan lists two commits in order with their Conventional
+      Commits messages, included files, and change summaries. The agent waits for approval.
+    - >-
+      After approval, the agent creates exactly two commits using the proposed order and messages. Check
+      Git history and the diff for each commit. One contains .gitignore alone and the other contains both
+      README.md and docs/formatting.md. All three files are committed.
+    - The final reply lists both commit hashes and subjects. Verify that the working tree is clean and no push occurred.
+collect_artifacts:
+  - 'README.md'
+  - '.gitignore'
+  - 'docs/formatting.md'
