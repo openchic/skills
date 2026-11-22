@@ -1,93 +1,93 @@
-# Skill 评测方案
+# Skill Evaluation
 
-修改 Skill 后运行一次评测。项目用 [Skill-Up](https://alibaba.github.io/skill-up/zh/) 执行当前版本，保存产物和执行记录，并逐项对比上一次保存的结果。结论以具体行为和证据为依据。
+Run an evaluation after changing a skill. The project uses [Skill-Up](https://alibaba.github.io/skill-up/) to run the current version, save artifacts and execution records, and compare each check with the preceding run. Base conclusions on specific behaviors and the evidence for them.
 
-## 运行评测
+## Run an Evaluation
 
-在仓库根目录操作。需要 Node.js 22.21 或更高版本、pnpm、加入 `PATH` 的全局 Skill-Up CLI，以及已登录的本地 Codex。当前验证使用 Skill-Up 0.14.0。各 Skill 的 `eval.yaml` 指定 `gpt-6-luna`，推理强度沿用本地 Codex 的 `max` 设置。执行任务和模型评审均消耗额度。
+Run these commands from the repository root. You need Node.js 22.21 or later, pnpm, a globally installed Skill-Up CLI on `PATH`, and a signed-in local Codex CLI. The current workflow was verified with Skill-Up 0.14.0. Each skill's `eval.yaml` specifies `gpt-6-luna` and uses the local Codex `max` reasoning setting. Both task execution and model-based judging consume usage quota.
 
 ```sh
-# 首次安装项目依赖
+# Install the project dependencies
 pnpm install --frozen-lockfile
 skill-up --version
 
-# 修改评测配置后检查，无需调用模型
+# Validate configuration changes without calling a model
 skill-up validate skills/code-style/evals/eval.yaml
 skill-up list-cases skills/code-style/evals/eval.yaml
 
-# 日常评测
+# Run an evaluation
 pnpm eval:skills code-style
 ```
 
-将 `code-style` 换成 `commit` 或 `vainjs` 即可评测对应 Skill。入口调用原生 `skill-up run`，每次只运行当前版本，基线来自已有报告。同一个 Skill 一次只运行一轮，等报告保存后再编辑 Skill 或评测文件。
+Replace `code-style` with `commit` or `vainjs` to evaluate another skill. The runner calls `skill-up run` for the current version and reads the baseline from saved reports. Run one evaluation at a time per skill. Wait for the report to be saved before editing the skill or its evaluation files.
 
-## 查看报告与管理历史
+## Review Reports and Manage History
 
-命令结束后会打印报告路径。先看 `comparison.md` 中的逐项证据，再打开链接中的 HTML 详情核对原始产物和执行记录。每轮保存在 `eval-results/skill-up/<name>/iteration-N/`。
+The command prints report paths when it finishes. Start with the evidence for each check in `comparison.md`, then open the linked HTML reports to verify the underlying artifacts and execution records. Each run is saved under `eval-results/skill-up/<name>/iteration-N/`.
 
-| 文件            | 用途                                                            |
-| --------------- | --------------------------------------------------------------- |
-| `comparison.md` | 并列展示两轮证据和变化结论                                      |
-| `report.html`   | Skill-Up 原生详情，用于复核执行记录和产物                       |
-| `result.json`   | 逐项对比使用的原始结果                                          |
-| `manifest.json` | 记录 Skill、评测文件和本地 Codex 配置的指纹，以及 Skill-Up 版本 |
+| File            | Purpose                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| `comparison.md` | Side-by-side evidence and conclusions for the two runs                                                |
+| `report.html`   | Native Skill-Up report for reviewing execution records and artifacts                                  |
+| `result.json`   | Raw results used for comparison                                                                       |
+| `manifest.json` | Fingerprints of the skill, evaluation files, and local Codex configuration, plus the Skill-Up version |
 
-首次运行建立记录，之后始终与紧邻的上一份 `result.json` 比较。用例失败或评审异常时，只要生成了新的 `result.json`，入口仍会保存对比并保留 Skill-Up 的退出状态。中断且没有 `result.json` 的目录不参与历史比较，本轮没生成新结果时入口报错。
+The first run establishes the baseline. Each subsequent run compares against the immediately preceding `result.json`. If a case fails or a judge encounters an error, the runner still saves the comparison and preserves the Skill-Up exit status when a new `result.json` exists. The runner skips interrupted directories that lack `result.json` and reports an error if the current run produces no new results.
 
-`eval-results/` 由 Git 忽略。日常可保留最新两轮的报告和产物，让最新的对比链接仍能打开。清空目录后，下一轮从首次记录开始。
+Git ignores `eval-results/`. Keeping the two most recent runs and their artifacts preserves the links in the latest comparison. Clearing the directory makes the next run a fresh baseline.
 
-## 判断改动是否有效
+## Interpret Changes
 
-入口按场景 ID 和检查项匹配两轮证据，分别记录 `expect` 前置检查和各评审的结论。前置检查失败时，随后的评审标为未执行。比较前保持任务、检查、夹具、工具版本、引擎、模型、推理强度和 Node.js 版本一致。入口自动核对评测文件和本地 Codex 配置的指纹、Skill-Up 版本以及原生报告的引擎和模型配置。Node.js 版本、外部依赖和实际加载的 Skill 仍需人工核对。
+The runner matches evidence across the two runs by case ID and check. It records `expect` gates and each judge's findings separately. If a gate fails, the subsequent judges are marked as skipped. Keep tasks, checks, fixtures, tool versions, engine, model, reasoning effort, and Node.js version consistent across runs. The runner compares fingerprints of the evaluation files and local Codex configuration, the Skill-Up version, and the engine and model configuration in the native reports. Verify the Node.js version, external dependencies, and the loaded skill separately.
 
-| 结论         | 判定依据                                                                              |
-| ------------ | ------------------------------------------------------------------------------------- |
-| 改善         | 条件可比，Skill 已变更，同一检查从未满足变为满足                                      |
-| 回归         | 条件可比，Skill 已变更，同一检查从满足变为未满足                                      |
-| 未观察到变化 | 检查结论一致，仍需核对两轮产物                                                        |
-| 无法判断     | 缺少历史、结论或证据，条件变化、新增或移除覆盖、执行异常，或 Skill 未变时检查结果波动 |
+| Conclusion         | Evidence                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Improvement        | The skill changed under comparable conditions and the same check changed from failing to passing                                     |
+| Regression         | The skill changed under comparable conditions and the same check changed from passing to failing                                     |
+| No observed change | The check outcomes match. Review the artifacts from both runs                                                                        |
+| Inconclusive       | Missing history, findings, or evidence, changed conditions or coverage, execution errors, or fluctuating results with the same skill |
 
-改善和回归是单轮信号。比如，同一测试从发现漏过滤停用用户变为通过，而且产物确实新增了过滤条件，才有证据说明该行为改善。对关键变化用干净夹具重复验证，可用 [Skill-Up CLI](https://alibaba.github.io/skill-up/zh/guide/cli-reference) 的 `--iteration N` 补充采样，配合 `--output-dir` 写入独立目录。
+Treat improvements and regressions as signals from a single run. For example, if a check for filtering inactive users starts passing, inspect the output to verify that the filter was added. Repeat important findings with a clean fixture. Use `--iteration N` with `--output-dir` to save additional samples in a separate directory. [Skill-Up CLI reference](https://alibaba.github.io/skill-up/guide/cli-reference)
 
-汇报时说明具体变化，引用两轮证据并附报告链接。结论限于已覆盖且核实的行为。若两轮都未满足要求，仍要报告问题。原生报告的汇总统计不用于判断改善。
+When reporting results, describe the specific behavior, cite evidence from both runs, and link to their reports. Limit conclusions to covered behavior you verified. Report problems that appear in both runs. Use individual checks and artifacts to assess improvements.
 
-## 维护用例与检查
+## Maintain Cases and Checks
 
-修改 Skill 或引用文档时，同步核对受影响的场景。已有用例能验证目标行为就保持不动。缺少覆盖时新增聚焦的用例，并在对应 `eval.yaml` 的 `cases.files` 注册。只有预期行为变了才调整原检查。评测文件变更后，整轮对比会标为条件变化，以新条件下的结果建立基线。
+When changing a skill or one of its references, review the affected cases. Keep existing cases that already cover the intended behavior. Add a focused case for a coverage gap and register it in `cases.files` in the corresponding `eval.yaml`. Update an existing check only when the expected behavior changes. Changes to evaluation files are reported as a change in conditions and require a new baseline.
 
-任务提示只交代真实需求和必要约束。重点覆盖真实失败、已有行为回归，以及规则不适用的边界。检查项保持独立，优先复用原生检查和已有测试。
+Write prompts that describe the actual task and necessary constraints. Cover known failures, regressions in existing behavior, and cases where a rule should not apply. Keep checks independent and reuse native checks and existing tests where possible.
 
-| Skill        | 当前覆盖                                                                                | 尚未覆盖的重点                     |
-| ------------ | --------------------------------------------------------------------------------------- | ---------------------------------- |
-| `code-style` | 共享函数与配置保留、公共类型与 API 契约复用、局部改动的范围、React 页面与私有 hook 结构 | 文件路由、Vue、Swift 的实际改动    |
-| `commit`     | 修改文件后准备提交消息，确认后提交或取消后保留改动                                      | 已有暂存内容、不同变更范围、无改动 |
-| `vainjs`     | npm 库初始化及构建产物入口、已有库扩展及工具链保留                                      | Chrome 扩展、更多已有配置组合      |
+| Skill        | Current coverage                                                                                                                                                | Coverage gaps                                      |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `code-style` | Shared functions, preservation of project configuration, reuse of common types and API contracts, local change scope, and React page and private hook structure | File-based routing, Vue changes, Swift changes     |
+| `commit`     | Planning all pending changes, grouping related files, committing after approval, and preserving changes after cancellation                                      | Splitting changes within a single file, clean tree |
+| `vainjs`     | Scaffolding an npm library with working build entry points and extending an existing library while preserving its toolchain                                     | Chrome extensions, more toolchain combinations     |
 
-功能行为用固定测试或实际调用验证。`script` judge 从评测目录加载测试，评测开始时的工程放在夹具或用例内联文件中。`agent_judge` 检查结构、改动范围和操作流程，证据来自代码差异、Git 历史或分轮执行记录。功能测试应能接受正确产物并拒绝典型错误。模型评审也应使用人工确认过的正反例校准，评审过程只读取或验证产物。
+Verify behavior with deterministic tests or actual calls. A `script` judge loads checks from the evaluation directory. Define the starting workspace with fixtures or inline case files. Use `agent_judge` to assess structure, scope, and workflow against diffs, Git history, or per-turn execution records. Test that deterministic checks accept known-good outputs and reject common mistakes. Calibrate model judges with reviewed positive and negative examples, and keep the review read-only.
 
-配置按 [Skill-Up 官方结构](https://alibaba.github.io/skill-up/zh/guide/writing-evals) 组织。
+The configuration follows the [Skill-Up evaluation format](https://alibaba.github.io/skill-up/guide/writing-evals).
 
-| 位置                                             | 职责                                   |
-| ------------------------------------------------ | -------------------------------------- |
-| `skills/<name>/evals/eval.yaml`                  | 引擎、模型、用例列表和报告设置         |
-| `skills/<name>/evals/cases/`                     | 任务、检查标准和产物采集               |
-| `skills/<name>/evals/fixtures/`、`checks/`       | 初始工程和原生脚本检查                 |
-| `evals/eval-skills.mjs`                          | 调用 Skill-Up 并生成相邻两轮的对比     |
-| `evals/check-skills.mjs`、`evals/evals.test.mjs` | 静态校验、比较逻辑与行为检查的本地验证 |
+| Location                                            | Purpose                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------- |
+| `skills/<name>/evals/eval.yaml`                     | Engine, model, case list, and report settings                 |
+| `skills/<name>/evals/cases/`                        | Tasks, criteria, and artifact collection                      |
+| `skills/<name>/evals/fixtures/` and `checks/`       | Starting projects and native script checks                    |
+| `evals/eval-skills.mjs`                             | Skill-Up invocation and comparison with the preceding run     |
+| `evals/check-skills.mjs` and `evals/evals.test.mjs` | Static validation, comparison tests, and behavior check tests |
 
-## 排查异常
+## Troubleshoot Evaluations
 
-| 现象                             | 处理                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| 没有新报告                       | 检查 CLI 是否在 `PATH`、Codex 是否已登录，以及配置校验是否通过         |
-| 依赖下载、会话恢复或评测超时     | 查阅原生报告的失败信息和命令记录，将受影响场景标为无法判断             |
-| 评审输出无法解析或判定与产物不符 | 复核原始产物和记录，将该检查标为无法判断。若需改检查标准，重新建立基线 |
+| Symptom                                                            | Action                                                                                                                         |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| No new report                                                      | Check that the CLI is on `PATH`, Codex is signed in, and configuration validation passes                                       |
+| Dependency download, session resume, or timeout error              | Inspect the native report and command records. Mark affected cases as inconclusive                                             |
+| Unreadable judge output or a verdict that conflicts with artifacts | Inspect the original artifacts and records. Mark the check as inconclusive and establish a new baseline if the criteria change |
 
-## 本地验证
+## Verify Locally
 
 ```sh
 pnpm check:skills
 pnpm test
 ```
 
-这两个命令无需调用模型，验证静态结构、比较逻辑，以及行为测试能否识别已知错误。TypeScript 场景使用 Node.js 的 `--experimental-strip-types` 验证运行行为，类型检查需另行执行。
+These commands validate the repository structure, the comparison logic, and the ability of the behavior checks to detect known mistakes without calling a model. TypeScript cases use Node.js `--experimental-strip-types` to verify runtime behavior. Run type checking separately.

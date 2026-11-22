@@ -1,8 +1,9 @@
 title: Add a React detail page using the existing route registry
 input:
   prompt: |
-    在现有用户列表旁新增一个用户详情子页面，在页面注册表中加入 /users/detail。
-    详情页通过 props 接收 userId，用按钮显示或隐藏该 ID。将切换状态整理到该页私有的 hook 中，保留原列表页。
+    Add a user details page alongside the existing user list and register /users/detail in the page registry.
+    The details page receives userId as a prop and uses a button to show or hide the ID. Keep the toggle state
+    in a hook private to the details page and preserve the user list.
 context:
   git:
     init: true
@@ -28,8 +29,15 @@ judge:
   model: gpt-6-luna
   pass_threshold: 1
   criteria:
-    - /users/detail 已通过现有注册表关联到详情组件，详情页与列表页是 src/pages/ 下的同级模块，原 /users 注册保持可用。引用注册表和实际路径。
-    - 详情组件以命名箭头函数变量声明，使用 FC<XProps> 标注变量类型，props 类型与组件名对应，并经自身 index.tsx 默认导出。引用实际类型和导出。
-    - 切换状态位于详情页自己的 hooks/ 中，hook 文件与函数同名，使用具名导出的函数声明；详情组件实际调用该 hook 控制 userId 的显示。评审 Agent 只读核对代码并引用调用位置。
+    - >-
+      The existing registry maps /users/detail to the details component. The details page and the list page are sibling
+      modules under src/pages/ and /users remains registered. Cite the registry and actual paths.
+    - >-
+      The details component is an arrow function assigned to a named variable typed as FC<XProps>. The props type
+      matches the component name and the component is the default export of its index.tsx. Cite the type and export.
+    - >-
+      The toggle state lives in the details page's own hooks/ directory. The hook's filename matches its function name,
+      and the hook is a named exported function declaration. The details component calls it to control the visibility
+      of userId. Inspect the code read-only and cite the call site.
 collect_artifacts:
   - 'src/**'

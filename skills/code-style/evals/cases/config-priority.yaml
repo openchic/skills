@@ -1,8 +1,8 @@
 title: Existing project configuration and module contracts
 input:
   prompt: |
-    users 和 reports 模块各有一份重复的标题标准化函数，请整理成共享实现。
-    直接修改当前工程，保持现有行为。
+    The users and reports modules each have a copy of the title normalization function. Extract a shared implementation.
+    Make the changes in the current project and preserve existing behavior.
 context:
   repo_fixture: evals/fixtures/config-priority
   git:
@@ -27,9 +27,15 @@ judges:
     model: gpt-6-luna
     pass_threshold: 1
     criteria:
-      - 根据工作区 diff 确认 package.json 和 .prettierrc 保持原样，没有安装依赖、改写工程配置或转换为 TypeScript。
-      - 标题标准化逻辑已提取到共享模块，users 和 reports 两个模块都实际调用它，没有保留重复实现或添加未使用的共享函数。
-      - 修改遵循项目现有格式配置，文件职责清晰，所有改动都与共享标题标准化任务相关。评审 Agent 只读核对代码。
+      - >-
+        Use the workspace diff to verify that package.json and .prettierrc are unchanged and that the
+        change includes no dependency installation, project configuration rewrite, or TypeScript migration.
+      - >-
+        A shared module owns title normalization and both users and reports call it. The change leaves
+        no duplicate implementation or unused shared function.
+      - >-
+        Changes follow the project's formatting configuration, keep file responsibilities clear, and stay
+        within the title normalization task. Use read-only commands to inspect the code.
 collect_artifacts:
   - 'src/**'
   - '*.json'

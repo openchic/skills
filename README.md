@@ -31,9 +31,9 @@ Or add marketplace to Claude Code:
 3. Update `.claude-plugin/marketplace.json`
 4. Submit a pull request
 
-## 质量校验
+## Quality Checks
 
-安装项目依赖后，可以运行静态检查和评测入口测试：
+Install the project dependencies, then run the static checks and evaluation runner tests.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -41,13 +41,13 @@ pnpm check:skills
 pnpm test
 ```
 
-Skill 评测使用全局安装的 [Skill-Up CLI](https://alibaba.github.io/skill-up/zh/)，配置、用例和夹具位于各 Skill 的 `evals/` 中。每次只评测当前 Skill，保存结果并自动与上一次报告逐项比较，展示改善、回归、未观察到变化或无法判断，以及两次检查的证据：
+Skill evaluations use the globally installed [Skill-Up CLI](https://alibaba.github.io/skill-up/). Each skill keeps its configuration, cases, and fixtures in its own `evals/` directory. A run evaluates the current version of one skill, saves the results, and compares each check with its previous result. The report shows both runs' evidence and classifies each change as an improvement, regression, no observed change, or inconclusive.
 
 ```bash
 pnpm eval:skills code-style
 ```
 
-将 `code-style` 替换为 `commit` 或 `vainjs` 即可评测其他 Skill。首次运行没有历史对照；之后直接比较最近一份报告。报告保存在 `eval-results/skill-up/<skill>/iteration-N/`，在对话中展示变化并链接详情。结论限于实际覆盖的行为。模型评测会消耗额度，完整方案、证据要求和覆盖计划见 [Skill 评测](docs/skill-evaluation.md)。
+Replace `code-style` with `commit` or `vainjs` to evaluate another skill. The first run establishes a baseline. Later runs compare against the immediately preceding report. Reports are saved under `eval-results/skill-up/<skill>/iteration-N/`. When reporting results, describe the observed behavior and link to the detailed reports. Model evaluations consume usage quota. See [Skill Evaluation](docs/skill-evaluation.md) for the workflow, evidence requirements, and coverage.
 
 ## License
 

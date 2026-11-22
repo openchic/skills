@@ -95,11 +95,11 @@ const run = (directory, passed, skillSHA256) => ({
         grading: {
           assertion_results: [
             {
-              text: '复用公共类型',
+              text: 'Reuse shared types',
               passed,
               evidence: passed
-                ? 'src/user.ts 引用公共类型'
-                : 'src/user.ts 重复声明字段',
+                ? 'src/user.ts uses a shared type'
+                : 'src/user.ts redeclares fields',
             },
           ],
         },
@@ -112,18 +112,18 @@ test('comparison reports behavior transitions with both evidence records, never 
   const before = run('/tmp/iteration-1', false, 'old')
   const after = run('/tmp/iteration-2', true, 'new')
   const report = compareRuns(after, before)
-  assert.match(report, /改善：单轮检查信号/)
-  assert.match(report, /src\/user.ts 重复声明字段/)
-  assert.match(report, /src\/user.ts 引用公共类型/)
-  assert.doesNotMatch(report, /%|百分点|pass_rate/)
-  assert.match(compareRuns(before, after), /回归：单轮检查信号/)
+  assert.match(report, /Improvement — single-run signal/)
+  assert.match(report, /src\/user.ts redeclares fields/)
+  assert.match(report, /src\/user.ts uses a shared type/)
+  assert.doesNotMatch(report, /%|percentage points|pass_rate/)
+  assert.match(compareRuns(before, after), /Regression — single-run signal/)
   assert.match(
     compareRuns(after, run('/tmp/iteration-1', true, 'old')),
-    /未观察到变化/
+    /No observed change/
   )
   assert.match(
     compareRuns(before, run('/tmp/iteration-0', false, 'older')),
-    /问题仍存在/
+    /A problem remains/
   )
 })
 
@@ -160,28 +160,28 @@ test('incomplete evidence, execution errors, configuration changes and unchanged
     const changed = structuredClone(after)
     mutate(changed)
     const report = compareRuns(changed, before)
-    assert.match(report, /无法判断/)
-    assert.doesNotMatch(report, /改善：|回归：/)
+    assert.match(report, /Inconclusive/)
+    assert.doesNotMatch(report, /Improvement —|Regression —/)
   }
   const errored = structuredClone(before)
   errored.result.case_results[0].status = 'ERROR'
-  assert.match(compareRuns(after, errored), /无法判断：存在执行异常/)
-  assert.match(compareRuns(after), /无法判断：首次记录/)
+  assert.match(compareRuns(after, errored), /Inconclusive — execution error/)
+  assert.match(compareRuns(after), /Inconclusive — first run/)
 })
 
 test('comparison retains removed coverage, identifies new checks and escapes evidence cells', () => {
   const before = run('/tmp/iteration-1', false, 'old')
   const after = run('/tmp/iteration-2', true, 'new')
   const check = after.result.case_results[0].grading.assertion_results[0]
-  check.text = '新增检查'
+  check.text = 'New check'
   check.evidence = 'a|b\nc'
   const report = compareRuns(after, before)
-  assert.match(report, /reuse \/ 复用公共类型/)
-  assert.match(report, /reuse \/ 新增检查/)
-  assert.match(report, /新增或移除覆盖/)
+  assert.match(report, /reuse \/ Reuse shared types/)
+  assert.match(report, /reuse \/ New check/)
+  assert.match(report, /coverage added or removed/)
   assert.ok(report.includes('a\\|b c'))
   after.result.case_results = []
-  assert.match(compareRuns(after, before), /reuse \/ 复用公共类型/)
+  assert.match(compareRuns(after, before), /reuse \/ Reuse shared types/)
   after.result.case_results = [
     { case_id: 'excluded', configuration: 'without_skill' },
   ]
@@ -200,12 +200,12 @@ test('native judge groups retain individual evidence instead of summary verdicts
     item.grading = { assertion_results: [{ text: 'aggregate verdict' }] }
   }
   const report = compareRuns(after, before)
-  assert.match(report, /behavior \/ 复用公共类型/)
-  assert.match(report, /structure \/ 复用公共类型/)
-  assert.match(report, /src\/user.ts 重复声明字段/)
+  assert.match(report, /behavior \/ Reuse shared types/)
+  assert.match(report, /structure \/ Reuse shared types/)
+  assert.match(report, /src\/user.ts redeclares fields/)
   assert.doesNotMatch(report, /aggregate verdict/)
   delete after.result.case_results[0].judge_results[0].result
-  assert.match(compareRuns(after, before), /behavior \/ 执行结果/)
+  assert.match(compareRuns(after, before), /behavior \/ Execution result/)
 })
 
 test('a failed native gate remains comparable when it skips grouped judges', () => {
@@ -221,15 +221,15 @@ test('a failed native gate remains comparable when it skips grouped judges', () 
   }
   second.judge_results = [{ id: 'structure', status: 'SKIP' }]
   const report = compareRuns(after, before)
-  assert.match(report, /expect .*missing package\.json.*回归：/)
-  assert.match(report, /复用公共类型.*无法判断：前置检查未通过/)
-  assert.doesNotMatch(report, /新增或移除覆盖/)
+  assert.match(report, /expect .*missing package\.json.*Regression —/)
+  assert.match(report, /Reuse shared types.*Inconclusive — judging skipped after a failed pre-check/)
+  assert.doesNotMatch(report, /coverage added or removed/)
 
   second.status = 'ERROR'
   second.gates = { passed: true, configured_rules: ['files_exist'] }
   assert.match(
     compareRuns(after, before),
-    /expect .*满足要求：files_exist.*无法判断：存在执行异常/
+    /expect .*Passed — files_exist.*Inconclusive — execution error/
   )
 })
 

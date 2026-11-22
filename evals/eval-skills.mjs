@@ -39,7 +39,7 @@ export const readHistory = directory => {
 }
 
 const cell = value =>
-  String(value ?? '无证据记录')
+  String(value ?? 'No evidence recorded')
     .replace(/\|/g, '\\|')
     .replace(/[\r\n]+/g, ' ')
 
@@ -78,7 +78,7 @@ export const compareRuns = (current, previous) => {
   const checks = item => {
     const assertions = item?.judge_results?.length
       ? item.judge_results.flatMap(judge =>
-          (judge.result?.assertion_results || [{ text: '执行结果' }]).map(
+          (judge.result?.assertion_results || [{ text: 'Execution result' }]).map(
             check => ({ ...check, text: `${judge.id} / ${check.text}` })
           )
         )
@@ -89,8 +89,8 @@ export const compareRuns = (current, previous) => {
     const gate = {
       passed: gates.passed,
       evidence: gates.passed
-        ? gates.configured_rules?.join('、')
-        : gates.failures?.map(failure => failure.detail ?? failure).join('；'),
+        ? gates.configured_rules?.join(', ')
+        : gates.failures?.map(failure => failure.detail ?? failure).join(' · '),
     }
     return new Map([
       ['expect', gate],
@@ -101,11 +101,11 @@ export const compareRuns = (current, previous) => {
   }
   const label = (item, check) => {
     if (typeof check?.passed !== 'boolean') {
-      if (item?.status === 'ERROR') return '执行异常'
-      if (item?.gates?.passed === false) return '未执行：前置检查未通过'
-      return '无检查结论'
+      if (item?.status === 'ERROR') return 'Execution error'
+      if (item?.gates?.passed === false) return 'Skipped after a failed pre-check'
+      return 'No check result'
     }
-    return `${check.passed ? '满足要求' : '未满足要求'}：${cell(check.evidence)}`
+    return `${check.passed ? 'Passed' : 'Failed'} — ${cell(check.evidence)}`
   }
   const rows = [...new Set([...old.keys(), ...currentCases.keys()])].flatMap(
     id => {
@@ -114,32 +114,32 @@ export const compareRuns = (current, previous) => {
       const before = checks(prior)
       const after = checks(item)
       const names = [...new Set([...before.keys(), ...after.keys()])]
-      if (!names.length) names.push('执行结果')
+      if (!names.length) names.push('Execution result')
       return names.map(name => {
         const a = before.get(name)
         const b = after.get(name)
-        let change = '无法判断'
-        if (!previous) change += '：首次记录'
+        let change = 'Inconclusive'
+        if (!previous) change += ' — first run'
         else if (prior?.status === 'ERROR' || item?.status === 'ERROR')
-          change += '：存在执行异常'
+          change += ' — execution error'
         else if (
           name !== 'expect' &&
           (prior?.gates?.passed === false || item?.gates?.passed === false)
         )
-          change += '：前置检查未通过，评审未执行'
-        else if (!prior || !item || !a || !b) change += '：新增或移除覆盖'
-        else if (!sameConditions) change += '：条件变化或记录不完整'
+          change += ' — judging skipped after a failed pre-check'
+        else if (!prior || !item || !a || !b) change += ' — coverage added or removed'
+        else if (!sameConditions) change += ' — conditions changed or records are incomplete'
         else if (
           typeof a.passed !== 'boolean' ||
           typeof b.passed !== 'boolean' ||
           !a.evidence?.trim() ||
           !b.evidence?.trim()
         )
-          change += '：缺少结论或证据'
+          change += ' — missing result or evidence'
         else if (a.passed === b.passed)
-          change = '未观察到变化：检查结论一致，仍需核对产物'
-        else if (!skillChanged) change += '：Skill 未变，检查结果波动'
-        else change = `${b.passed ? '改善' : '回归'}：单轮检查信号，需复核证据`
+          change = 'No observed change — outcomes match, review the artifacts'
+        else if (!skillChanged) change += ' — outcomes differ with the same skill'
+        else change = `${b.passed ? 'Improvement' : 'Regression'} — single-run signal, verify the evidence`
         return `| ${cell(id)} / ${cell(name)} | ${label(prior, a)} | ${label(item, b)} | ${change} |`
       })
     }
@@ -154,24 +154,26 @@ export const compareRuns = (current, previous) => {
       .join('/')
   }
   return [
-    `# ${current.result.skill_name} 评测对比`,
+    `# ${current.result.skill_name} evaluation comparison`,
     '',
-    `[本次报告](${link(current)})${previous ? ` · [上次报告](${link(previous)})` : ''}`,
+    `[Current report](${link(current)})${previous ? ` · [Previous report](${link(previous)})` : ''}`,
     '',
     previous
-      ? `已记录的评测条件${sameConditions ? '一致' : '变化或不完整，本次差异不能直接归因于 Skill 修改'}。`
-      : '首次记录，尚无上次结果可供比较；有执行异常的项目不能作为有效基准。',
+      ? sameConditions
+        ? 'The recorded evaluation conditions match.'
+        : 'Evaluation conditions changed or records are incomplete. Attribution to the skill change is inconclusive.'
+      : 'This is the first recorded run. Treat checks with execution errors as inconclusive when establishing a baseline.',
     '',
     current.manifest?.skillSHA256 && previous?.manifest?.skillSHA256
-      ? `Skill 内容${current.manifest.skillSHA256 === previous.manifest.skillSHA256 ? '未变化' : '已变化'}。`
+      ? `The skill content ${current.manifest.skillSHA256 === previous.manifest.skillSHA256 ? 'is unchanged' : 'has changed'}.`
       : '',
     '',
-    '| 场景 / 检查项 | 上次证据 | 本次证据 | 变化 |',
+    '| Case / check | Previous evidence | Current evidence | Change |',
     '| --- | --- | --- | --- |',
     ...rows,
     '',
-    '结论来自 Skill-Up 的逐项检查，不使用汇总分数。单轮变化仅为信号；检查结论相同不代表产物相同，均未满足要求时问题仍存在。',
-    '复核两份报告中的代码差异、执行记录和实际产物；确认加载被测 Skill，排除其他同名 Skill 与环境变化的干扰。模型波动需要重复验证。',
+    'Conclusions use individual Skill-Up checks. Treat changes from a single run as signals. Compare artifacts even when outcomes match. A problem remains if the check fails in both runs.',
+    'Review the diffs, execution records, and artifacts from both runs. Verify which skill was loaded and check for environment differences or other skills with the same name. Repeat checks when model results fluctuate.',
     '',
   ].join('\n')
 }
@@ -181,7 +183,8 @@ export const runEvaluation = (skillDirectory, outputDirectory) => {
   const config = path.join(skillDirectory, 'evals/eval.yaml')
   if (!fs.existsSync(config)) throw new Error('Missing eval config: ' + config)
   const version = spawnSync('skill-up', ['--version'], { encoding: 'utf8' })
-  if (version.status !== 0) throw new Error('请先全局安装 skill-up 并加入 PATH')
+  if (version.status !== 0)
+    throw new Error('Install Skill-Up globally and make sure skill-up is on PATH')
   const history = readHistory(outputDirectory)
   const lastDirectory = history.at(-1)?.directory
   const previous = history.at(-1)
@@ -211,7 +214,7 @@ export const runEvaluation = (skillDirectory, outputDirectory) => {
   if (executed.error) throw executed.error
   const current = readHistory(outputDirectory).at(-1)
   if (!current || current.directory === lastDirectory) {
-    throw new Error('Skill-Up 没有生成新的 result.json')
+    throw new Error('Skill-Up did not produce a new result.json')
   }
   current.manifest = manifest
   fs.writeFileSync(
@@ -222,8 +225,8 @@ export const runEvaluation = (skillDirectory, outputDirectory) => {
   const summary = compareRuns(current, previous)
   fs.writeFileSync(comparison, summary)
   console.log('\n' + summary)
-  console.log('对比结果：' + comparison)
-  console.log('详细报告：' + path.join(current.directory, 'report.html'))
+  console.log('Comparison report saved to ' + comparison)
+  console.log('Detailed report saved to ' + path.join(current.directory, 'report.html'))
   return executed.status ?? 1
 }
 
@@ -235,7 +238,7 @@ if (
     const skill = process.argv[2]
     if (process.argv.length !== 3 || !/^[a-z0-9-]+$/.test(skill || ''))
       throw new Error(
-        '用法：pnpm eval:skills <skill>，例如 pnpm eval:skills code-style'
+        'Run pnpm eval:skills <skill>. For example, pnpm eval:skills code-style.'
       )
     process.exitCode = runEvaluation(
       path.join(ROOT, 'skills', skill),

@@ -1,8 +1,8 @@
 title: Keep a local change local when sharing and i18n are unnecessary
 input:
   prompt: |
-    formatReceipt 的金额显示需要调整为两位小数，例如 formatReceipt(3) 返回 Total: $3.00。
-    直接修改当前工程。
+    Update formatReceipt to display amounts with two decimal places. For example, formatReceipt(3) should return Total: $3.00.
+    Make the change in the current project.
 context:
   git:
     init: true
@@ -24,8 +24,12 @@ judges:
     model: gpt-6-luna
     pass_threshold: 1
     criteria:
-      - formatReceipt 的 CommonJS 导出保持可用；金额格式化仍位于唯一使用它的模块，没有新建共享 utils、服务层或空目录文件。引用文件清单和实际代码。
-      - 工程没有国际化设施，未为单条 Total 文案新增语言包、copy 文件或国际化依赖；package.json 保持原样。评审 Agent 只读核对产物。
+      - >-
+        The CommonJS export for formatReceipt still works. Amount formatting stays in its only consumer module,
+        with no shared utilities, service layer, or files added solely to create directories. Cite the file list and code.
+      - >-
+        The project has no internationalization system. Verify that the Total string introduces no locale files,
+        copy files, or internationalization dependencies and that package.json is unchanged. Inspect artifacts read-only.
 collect_artifacts:
   - 'src/**'
   - '*.json'

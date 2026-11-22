@@ -1,8 +1,8 @@
 title: Extend an existing library without scaffolding it again
 input:
   prompt: |
-    为现有 greeting-kit 增加 farewell(name)，返回 Goodbye, {name}!。
-    从包的公开入口导出，保持 greet 的行为。
+    Add farewell(name) to the existing greeting-kit package. It should return "Goodbye, {name}!"
+    Export it from the public entry point and preserve the behavior of greet.
 context:
   git:
     init: true
@@ -26,8 +26,13 @@ judges:
     model: gpt-6-luna
     pass_threshold: 1
     criteria:
-      - package.json 的名称、版本、模块类型和原有公开入口保持兼容，没有重新初始化工程、迁移语言、增加构建或格式化工具链、安装无关依赖；引用实际 diff 和命令记录。
-      - 被测 Agent 的代码改动集中于新增 farewell 及其导出，没有发布、推送或创建任务提交。评审 Agent 只读核对产物与命令记录。
+      - >-
+        The package name, version, module type, and existing public entry point remain compatible. The agent
+        does not scaffold the project again, switch languages, add build or formatting tools, or install
+        unrelated dependencies. Cite the diff and command records.
+      - >-
+        Code changes focus on adding farewell and exporting it. The agent creates no task commits, pushes,
+        or releases. Inspect artifacts and command records read-only.
 collect_artifacts:
   - 'src/**'
   - '*.json'

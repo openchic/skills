@@ -1,10 +1,10 @@
 title: Scaffold a working npm library
 input:
   prompt: |
-    在当前目录初始化一个名为 greeting-kit 的 npm 库，使用工程规范约定的工具链。
-    提供 TypeScript 导出 greet(name: string): string，返回 Hello, {name}!。
-    请完成依赖安装并验证构建，同时让发布入口与生成的 JavaScript、类型声明匹配。
-    只在当前临时工程操作，不发布、不推送、不创建提交。
+    Initialize an npm library named greeting-kit in the current directory using the toolchain specified by the project conventions.
+    Export the TypeScript function greet(name: string): string, which returns Hello, {name}!.
+    Install dependencies, verify the build, and make sure the published entry points match the generated JavaScript and type declarations.
+    Limit changes to this temporary project. Do not publish, push, or create commits.
 context:
   repo_fixture: evals/fixtures/npm-package
   git:
@@ -28,13 +28,22 @@ judge:
   model: gpt-6-luna
   pass_threshold: 1
   criteria:
-    - package.json 的名称为 greeting-kit，使用 ESM、pnpm 和 Rolldown；TypeScript 启用 strict 和 declaration，ESLint 使用 @vainjs/eslint-config，Prettier 使用单引号且无分号；配置 lint-staged、commitlint 和 changelog，依赖使用具体版本范围而非占位符，packageManager 记录实际 pnpm 版本。
-    - 根据 transcript 的命令及退出码确认依赖安装和构建成功；只读检查 main、types 和声明的 exports 均指向实际存在的产物，类型声明含 greet 的公开签名。不能凭成功自述判定，也不得由评审补跑安装或构建来修复缺失产物。
     - >-
-      由你（评审 Agent）通过 package.json 声明的公开 JavaScript 入口实际 import 并调用 greet，
-      验证 greet('World') 为 Hello, World!、greet('') 为 Hello, !、greet('小明') 为 Hello, 小明!。
-      引用实际探针命令、返回值和退出码；只查看源码或直接调用 src 下的函数不能证明构建产物可消费。
-    - Husky hook 可执行，提交前检查和提交消息校验可用；被测 Agent 没有创建提交、推送或发布，改动仅发生在当前工程。评审 Agent 只读检查 hook 和执行记录。
+      package.json names the package greeting-kit and the project uses ESM, pnpm, and Rolldown. TypeScript enables
+      strict and declaration. ESLint uses @vainjs/eslint-config. Prettier uses single quotes and omits semicolons.
+      The project configures lint-staged, commitlint, and the changelog. Dependency ranges specify versions, and
+      packageManager records the pnpm version actually used.
+    - >-
+      Use the transcript commands and exit codes to verify successful installation and build. Use read-only checks
+      to confirm that main, types, and the declared exports point to existing artifacts and that the declarations
+      contain the public signature of greet. Require execution evidence and leave missing artifacts as found.
+    - >-
+      As the judge, import and call greet through the public JavaScript entry point declared in package.json.
+      Verify that greet('World') returns Hello, World!, greet('') returns Hello, !, and greet('小明') returns Hello, 小明!.
+      Cite the actual probe command, return values, and exit code from the built entry point.
+    - >-
+      Husky hooks are executable, and pre-commit checks and commit message validation work. The agent creates no commits,
+      pushes, or releases, and all changes are within the current project. Inspect the hooks and execution records read-only.
 collect_artifacts:
   - 'src/**'
   - 'dist/**'
